@@ -75,5 +75,25 @@ class ExpenseService {
     return updated;
   }
 
+  // Filter by category
+  List<Expense> filterByCategory(String category) {
+    return _expenses
+        .where((e) => e.category.toLowerCase() == category.toLowerCase())
+        .toList();
+  }
+
+  // Search in note
+  List<Expense> searchByNote(String query) {
+    final lowerQuery = query.toLowerCase();
+    return _expenses
+        .where((e) => e.note.toLowerCase().contains(lowerQuery))
+        .toList();
+  }
+
+  // Filter by month (1-12)
+  List<Expense> filterByMonth(int month) {
+    return _expenses.where((e) => e.date.month == month).toList();
+  }
+
   int get count => _expenses.length;
 }

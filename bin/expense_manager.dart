@@ -123,9 +123,7 @@ void handleList(ExpenseService service, ArgResults args) {
   final monthStr = args['month'] as String?;
 
   if (categoryFilter != null) {
-    expenses = expenses
-        .where((e) => e.category.toLowerCase() == categoryFilter.toLowerCase())
-        .toList();
+    expenses = service.filterByCategory(categoryFilter);
   }
 
   if (search != null && search.isNotEmpty) {
@@ -146,7 +144,7 @@ void handleList(ExpenseService service, ArgResults args) {
     return;
   }
 
-  // Table
+  // Table output
   print('┌──────┬────────────┬──────────────┬────────────────────────────┐');
   print('│  ID  │   Amount   │   Category   │            Note            │');
   print('├──────┼────────────┼──────────────┼────────────────────────────┤');

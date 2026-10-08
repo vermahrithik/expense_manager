@@ -6,10 +6,12 @@ A clean, well-structured command-line Expense Manager built with Dart.
 
 - Add, list, update, and delete expenses
 - Persistent storage using JSON (`data/expenses.json`)
-- Filter expenses by category
+- Filter by category
+- Search by note
+- Filter by month
 - Beautiful formatted table output
 - Summary with total, average, and category breakdown
-- Help command
+- Built with the official `args` package
 - Unit tested
 
 ## Usage
@@ -21,8 +23,14 @@ dart run bin/expense_manager.dart add --amount 250 --category food --note "Dinne
 # List all expenses
 dart run bin/expense_manager.dart list
 
-# List by category
+# Filter by category
 dart run bin/expense_manager.dart list --category food
+
+# Search in notes
+dart run bin/expense_manager.dart list --search lunch
+
+# Filter by month (1-12)
+dart run bin/expense_manager.dart list --month 10
 
 # Update an expense
 dart run bin/expense_manager.dart update 3 --amount 350 --note "Updated Lunch"
@@ -30,7 +38,7 @@ dart run bin/expense_manager.dart update 3 --amount 350 --note "Updated Lunch"
 # Delete an expense
 dart run bin/expense_manager.dart delete 2
 
-# Show summary (total + average + by category)
+# Show summary
 dart run bin/expense_manager.dart summary
 
 # Show help

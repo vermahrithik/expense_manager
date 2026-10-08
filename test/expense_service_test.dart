@@ -92,4 +92,32 @@ void main() {
       expect(updated.category, equals('food')); // unchanged
     });
   });
+
+  group('ExpenseService Filtering', () {
+    late ExpenseService service;
+
+    setUp(() async {
+      service = ExpenseService();
+      await service.addExpense(amount: 100, category: 'food', note: 'Lunch');
+      await service.addExpense(amount: 200, category: 'transport', note: 'Train');
+      await service.addExpense(amount: 50, category: 'food', note: 'Coffee');
+    });
+
+    test('filterByCategory works', () {
+      final result = service.filterByCategory('food');
+      expect(result.length, equals(2));
+      expect(result.every((e) => e.category == 'food'), isTrue);
+    });
+
+    test('searchByNote works', () {
+      final result = service.searchByNote('coffee');
+      expect(result.length, equals(1));
+      expect(result.first.note, equals('Coffee'));
+    });
+
+    test('filterByMonth works', () {
+      final result = service.filterByMonth(DateTime.now().month);
+      expect(result.length, equals(3)); // all added today
+    });
+  });
 }
