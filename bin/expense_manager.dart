@@ -27,6 +27,9 @@ void main(List<String> arguments) async {
     case 'summary':
       handleSummary(service);
       break;
+    case 'help':
+      printUsage();
+      break;
     default:
       print('Unknown command: $command');
       printUsage();
@@ -40,12 +43,23 @@ Expense Manager CLI
 Usage:
   dart run bin/expense_manager.dart <command> [options]
 
-Commands:
+Available Commands:
   add       Add a new expense
+            Example: add --amount 250 --category food --note "Dinner"
+
   list      List all expenses
+            Example: list
+            Example: list --category food
+
+  update    Update an existing expense
+            Example: update 3 --amount 350 --note "Updated"
+
   delete    Delete an expense by ID
-  update    Update an expense by ID
-  summary   Show total and count
+            Example: delete 2
+
+  summary   Show total + category breakdown + average
+
+  help      Show this help message
 ''');
 }
 
@@ -82,7 +96,7 @@ Future<void> handleAdd(ExpenseService service, List<String> args) async {
 void handleList(ExpenseService service, [List<String> args = const []]) {
   var expenses = service.getAllExpenses();
 
-  // Simple filter: list --category food
+  // Filter by category if provided
   String? categoryFilter;
   for (int i = 0; i < args.length; i++) {
     if (args[i] == '--category' && i + 1 < args.length) {
@@ -103,17 +117,22 @@ void handleList(ExpenseService service, [List<String> args = const []]) {
     return;
   }
 
-  print('ID  | Amount   | Category     | Note');
-  print('----|----------|--------------|----------------');
+  // Header
+  print('┌──────┬────────────┬──────────────┬────────────────────────────┐');
+  print('│  ID  │   Amount   │   Category   │            Note            │');
+  print('├──────┼────────────┼──────────────┼────────────────────────────┤');
 
   for (final e in expenses) {
-    print(
-      '${e.id.toString().padRight(3)} | '
-          '${e.amount.toStringAsFixed(2).padLeft(8)} | '
-          '${e.category.padRight(12)} | '
-          '${e.note}',
-    );
+    final id = e.id.toString().padLeft(4);
+    final amount = e.amount.toStringAsFixed(2).padLeft(10);
+    final category = e.category.padRight(12);
+    final note = (e.note.length > 26 ? '${e.note.substring(0, 23)}...' : e.note)
+        .padRight(26);
+
+    print('│ $id │ $amount │ $category │ $note │');
   }
+
+  print('└──────┴────────────┴──────────────┴────────────────────────────┘');
 }
 
 Future<void> handleDelete(ExpenseService service, List<String> args) async {
@@ -189,23 +208,22 @@ void handleSummary(ExpenseService service) {
     return;
   }
 
-  // Total
   final total = expenses.fold<double>(0, (sum, e) => sum + e.amount);
+  final average = total / expenses.length;
 
   print('========== SUMMARY ==========');
   print('Total expenses : ${expenses.length}');
   print('Total amount   : ${total.toStringAsFixed(2)}');
+  print('Average expense: ${average.toStringAsFixed(2)}');
   print('');
 
   // Group by category
   final Map<String, double> byCategory = {};
-
   for (final e in expenses) {
     byCategory[e.category] = (byCategory[e.category] ?? 0) + e.amount;
   }
 
   print('--- By Category ---');
-  // Sort by amount descending
   final sorted = byCategory.entries.toList()
     ..sort((a, b) => b.value.compareTo(a.value));
 
