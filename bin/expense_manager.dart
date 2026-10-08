@@ -1,31 +1,23 @@
-import '../lib/models/expense.dart';
-import '../lib/services/expense_service.dart';
+import 'package:expense_manager/services/expense_service.dart';
 
-void main() {
+void main() async {
   final service = ExpenseService();
 
-  // Add some expenses
-  service.addExpense(amount: 250, category: 'food', note: 'Dinner');
-  service.addExpense(amount: 1200, category: 'transport', note: 'Train ticket');
-  service.addExpense(amount: 80, category: 'food', note: 'Coffee');
+  // Load existing data
+  await service.load();
+  print('Loaded ${service.count} expenses from file');
 
-  print('--- After Adding ---');
+  // Add a new one
+  await service.addExpense(
+    amount: 450,
+    category: 'shopping',
+    note: 'New shoes',
+  );
+
+  print('\n--- Current Expenses ---');
   for (final e in service.getAllExpenses()) {
     print(e);
   }
 
-  // Update expense with id 2
-  final updated = service.updateExpense(2, amount: 1350, note: 'Updated train ticket');
-  print('\nUpdated: $updated');
-
-  // Delete expense with id 3
-  final deleted = service.deleteExpense(3);
-  print('Deleted id 3? $deleted');
-
-  print('\n--- Final List ---');
-  for (final e in service.getAllExpenses()) {
-    print(e);
-  }
-
-  print('\nTotal remaining: ${service.count}');
+  print('\nData has been saved to data/expenses.json');
 }
