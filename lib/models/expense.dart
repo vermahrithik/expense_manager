@@ -30,6 +30,28 @@ class Expense {
     );
   }
 
+  // Convert Expense → Map (for JSON)
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'amount': amount,
+      'category': category,
+      'note': note,
+      'date': date.toIso8601String(),
+    };
+  }
+
+  // Create Expense from Map (from JSON)
+  factory Expense.fromJson(Map<String, dynamic> json) {
+    return Expense(
+      id: json['id'] as int,
+      amount: (json['amount'] as num).toDouble(),
+      category: json['category'] as String,
+      note: json['note'] as String? ?? '',
+      date: DateTime.parse(json['date'] as String),
+    );
+  }
+
   @override
   String toString() {
     return 'Expense(id: $id, amount: $amount, category: $category, note: $note, date: $date)';
