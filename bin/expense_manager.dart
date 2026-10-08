@@ -16,10 +16,13 @@ void main(List<String> arguments) async {
       await handleAdd(service, arguments.skip(1).toList());
       break;
     case 'list':
-      handleList(service);
+      handleList(service, arguments.skip(1).toList());
       break;
     case 'delete':
       await handleDelete(service, arguments.skip(1).toList());
+      break;
+    case 'update':
+      await handleUpdate(service, arguments.skip(1).toList());
       break;
     case 'summary':
       handleSummary(service);
@@ -41,6 +44,7 @@ Commands:
   add       Add a new expense
   list      List all expenses
   delete    Delete an expense by ID
+  update    Update an expense by ID
   summary   Show total and count
 ''');
 }
@@ -75,11 +79,27 @@ Future<void> handleAdd(ExpenseService service, List<String> args) async {
   print('Added: $expense');
 }
 
-void handleList(ExpenseService service) {
-  final expenses = service.getAllExpenses();
+void handleList(ExpenseService service, [List<String> args = const []]) {
+  var expenses = service.getAllExpenses();
+
+  // Simple filter: list --category food
+  String? categoryFilter;
+  for (int i = 0; i < args.length; i++) {
+    if (args[i] == '--category' && i + 1 < args.length) {
+      categoryFilter = args[i + 1].toLowerCase();
+    }
+  }
+
+  if (categoryFilter != null) {
+    expenses = expenses
+        .where((e) => e.category.toLowerCase() == categoryFilter)
+        .toList();
+  }
 
   if (expenses.isEmpty) {
-    print('No expenses found.');
+    print(categoryFilter != null
+        ? 'No expenses found for category "$categoryFilter".'
+        : 'No expenses found.');
     return;
   }
 
@@ -111,6 +131,51 @@ Future<void> handleDelete(ExpenseService service, List<String> args) async {
   final success = await service.deleteExpense(id);
   if (success) {
     print('Deleted expense with ID $id');
+  } else {
+    print('Expense with ID $id not found');
+  }
+}
+
+Future<void> handleUpdate(ExpenseService service, List<String> args) async {
+  if (args.isEmpty) {
+    print('Error: Please provide an ID. Example: update 2 --amount 500');
+    return;
+  }
+
+  final id = int.tryParse(args[0]);
+  if (id == null) {
+    print('Error: ID must be a number');
+    return;
+  }
+
+  double? amount;
+  String? category;
+  String? note;
+
+  for (int i = 1; i < args.length; i++) {
+    if (args[i] == '--amount' && i + 1 < args.length) {
+      amount = double.tryParse(args[i + 1]);
+    } else if (args[i] == '--category' && i + 1 < args.length) {
+      category = args[i + 1];
+    } else if (args[i] == '--note' && i + 1 < args.length) {
+      note = args[i + 1];
+    }
+  }
+
+  if (amount == null && category == null && note == null) {
+    print('Error: Provide at least one field to update (--amount, --category, or --note)');
+    return;
+  }
+
+  final updated = await service.updateExpense(
+    id,
+    amount: amount,
+    category: category,
+    note: note,
+  );
+
+  if (updated != null) {
+    print('Updated: $updated');
   } else {
     print('Expense with ID $id not found');
   }
