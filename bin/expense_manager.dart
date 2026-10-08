@@ -183,12 +183,39 @@ Future<void> handleUpdate(ExpenseService service, List<String> args) async {
 
 void handleSummary(ExpenseService service) {
   final expenses = service.getAllExpenses();
+
   if (expenses.isEmpty) {
     print('No expenses yet.');
     return;
   }
 
+  // Total
   final total = expenses.fold<double>(0, (sum, e) => sum + e.amount);
+
+  print('========== SUMMARY ==========');
   print('Total expenses : ${expenses.length}');
   print('Total amount   : ${total.toStringAsFixed(2)}');
+  print('');
+
+  // Group by category
+  final Map<String, double> byCategory = {};
+
+  for (final e in expenses) {
+    byCategory[e.category] = (byCategory[e.category] ?? 0) + e.amount;
+  }
+
+  print('--- By Category ---');
+  // Sort by amount descending
+  final sorted = byCategory.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
+
+  for (final entry in sorted) {
+    final percentage = (entry.value / total * 100).toStringAsFixed(1);
+    print(
+      '${entry.key.padRight(12)} : '
+          '${entry.value.toStringAsFixed(2).padLeft(10)}  ($percentage%)',
+    );
+  }
+
+  print('=============================');
 }
